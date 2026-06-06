@@ -190,6 +190,36 @@ impl Client {
         self.handle_response(resp)
     }
 
+    /// GET an endpoint and return the raw response bytes.
+    /// Used for binary downloads (e.g. PDFs) where JSON parsing would fail.
+    pub fn get_raw(&self, path: &str, query: &[(&str, &str)]) -> Result<Vec<u8>, ClientError> {
+        let url = format!("{}{path}", self.base_url);
+
+        if self.verbose {
+            eprintln!("[DEBUG] GET (raw) {url}");
+        }
+
+        let resp = self.apply_auth(self.inner.get(&url)).query(query).send()?;
+
+        let status = resp.status().as_u16();
+
+        if self.verbose {
+            eprintln!("[DEBUG] {status} ({:?})", resp.status());
+        }
+
+        if (200..300).contains(&status) {
+            let bytes = resp.bytes()?;
+            Ok(bytes.to_vec())
+        } else {
+            let body = resp.text().unwrap_or_default();
+            if self.verbose {
+                let truncated: String = body.chars().take(500).collect();
+                eprintln!("[DEBUG] Response: {truncated}");
+            }
+            Err(ClientError::from_response(status, body))
+        }
+    }
+
     fn apply_auth(
         &self,
         mut req: reqwest::blocking::RequestBuilder,

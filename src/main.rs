@@ -175,6 +175,7 @@ fn main() -> color_eyre::Result<()> {
                     return Ok(());
                 }
                 Commands::Upload(args) => commands::upload::upload(&client, args),
+                Commands::DownloadPdf(args) => commands::download_pdf::download(&client, args),
                 // Already handled above
                 Commands::Config { .. } | Commands::Login => unreachable!(),
             };

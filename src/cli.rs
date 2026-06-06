@@ -58,6 +58,9 @@ pub enum Commands {
     /// Upload a file to ERPNext
     Upload(UploadArgs),
 
+    /// Download a document as PDF
+    DownloadPdf(DownloadPdfArgs),
+
     /// Generate shell completion scripts
     GenerateCompletions {
         /// Shell to generate completions for
@@ -181,6 +184,28 @@ pub struct UploadArgs {
     /// Decode file content from base64 before uploading
     #[arg(long)]
     pub base64: bool,
+}
+
+/// Arguments for the `download-pdf` subcommand.
+#[derive(Args)]
+pub struct DownloadPdfArgs {
+    /// DocType name (e.g. "Sales Invoice")
+    pub doctype: String,
+
+    /// Document name (e.g. "SINV-0001")
+    pub name: String,
+
+    /// Print format name
+    #[arg(long, default_value = "Standard")]
+    pub format: String,
+
+    /// Omit letterhead
+    #[arg(long)]
+    pub no_letterhead: bool,
+
+    /// Output file path (writes to stdout if omitted)
+    #[arg(short, long)]
+    pub output: Option<String>,
 }
 
 #[derive(Clone, ValueEnum)]
