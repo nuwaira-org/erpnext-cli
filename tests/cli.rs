@@ -89,7 +89,7 @@ fn doctype_list_accepts_spaced_doctype_name() {
     let mock = server.mock(|when, then| {
         when.method(httpmock::Method::GET)
             .path("/api/resource/Sales%20Invoice")
-            .query_param("fields", "name")
+            .query_param("fields", "[\"name\"]")
             .header("Authorization", "token test-key:test-secret");
         then.status(200)
             .header("content-type", "application/json")

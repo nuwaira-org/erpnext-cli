@@ -51,12 +51,23 @@ pub fn list(
     limit_page_length: u64,
 ) -> Result<Value, ClientError> {
     let path = resource_path(doctype, None)?;
+    // ERPNext v1 API expects `fields` as a JSON array string (e.g. '["name","grand_total"]'),
+    // not a raw comma-separated string. Convert the user-supplied comma-list to JSON.
+    let fields_json = {
+        let values: Vec<Value> = fields
+            .split(',')
+            .map(|f| Value::String(f.trim().to_string()))
+            .collect();
+        serde_json::to_string(&values)
+            .map_err(|e| ClientError::Config(format!("failed to encode fields: {e}")))?
+    };
+
     let mut url = Url::parse(&format!("http://_{path}"))
         .map_err(|e| ClientError::Config(format!("invalid doctype name: {e}")))?;
 
     {
         let mut pairs = url.query_pairs_mut();
-        pairs.append_pair("fields", fields);
+        pairs.append_pair("fields", &fields_json);
         pairs.append_pair("limit_start", &limit_start.to_string());
         pairs.append_pair("limit_page_length", &limit_page_length.to_string());
         if let Some(f) = filters {
