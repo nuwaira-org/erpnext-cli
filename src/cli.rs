@@ -196,7 +196,7 @@ pub struct DownloadPdfArgs {
     pub name: String,
 
     /// Print format name
-    #[arg(long, default_value = "Standard")]
+    #[arg(long, alias = "print-format", default_value = "Standard")]
     pub format: String,
 
     /// Omit letterhead
